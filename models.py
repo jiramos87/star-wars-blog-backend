@@ -163,3 +163,100 @@ class UserFavVehicles(db.Model):
             "vehicles_id": self.vehicles_id,
             "user_id": self.user_id
         }
+
+def get_all_people():
+    characters = Character.query.all()
+    serialized_characters = map(lambda character: character.serialize(), characters)
+    if list(serialized_characters).count() > 0:
+        return {"data": list(serialized_characters), "status": 200 } 
+    else: 
+        return {"data": None, "status": 400, "message": "Database empty"}
+          
+def get_person(person_id):
+    characters = Character.query.all()
+    serialized_characters = map(lambda character: character.serialize(), characters)
+    filtered_characters = list(filter(lambda character: character['id'] == person_id, serialized_characters))
+    if filtered_characters.count() > 0:
+        return {"data": filtered_characters, "status": 200 } 
+    else: 
+        return {"data": None, "status": 400, "message": "Character id not valid"}  
+
+def get_all_planets():
+    planets = Planet.query.all()
+    serialized_planets = map(lambda planet: planet.serialize(), planets)
+    if list(serialized_planets).count() > 0:
+        return {"data": list(serialized_planets), "status": 200 } 
+    else: 
+        return {"data": None, "status": 400, "message": "Database empty"}
+
+def get_planet(planet_id):
+    planets = Character.query.all()
+    serialized_planets = map(lambda planet: planet.serialize(), planets)
+    filtered_planets = list(filter(lambda planet: planet['id'] == planet_id, serialized_planets))
+    if filtered_planets.count() > 0:
+        return {"data": filtered_planets, "status": 200 } 
+    else: 
+        return {"data": None, "status": 400, "message": "Planet id not valid"} 
+
+def get_all_users():
+    users = User.query.all()
+    serialized_users = map(lambda user: user.serialize(), users)
+    if list(serialized_users).count() > 0:
+        return {"data": list(serialized_users), "status": 200 } 
+    else: 
+        return {"data": None, "status": 400, "message": "Database empty"}
+
+def get_favorites():
+    fav_characters = Character.query.all()
+    fav_planets = Planet.query.all()
+    serialized_characters = map(lambda character: character.serialize(), fav_characters)
+    serialized_planets = map(lambda planet: planet.serialize(), fav_planets)
+    fav_list = list(serialized_characters) + list(serialized_planets)
+    if list(fav_list).count() > 0:
+        return {"data": list(fav_list), "status": 200 } 
+    else: 
+        return {"data": None, "status": 400, "message": "Database empty"}
+    
+def add_fav_planet(planet_id):
+    planet = Planet.query.get(planet_id)
+    db.session.add(planet)
+    db.session.commit()
+    fav_planets = UserFavPlanets.query.all()
+    serialized_fav_planets = map(lambda fav_planet: fav_planet.serialize(), fav_planets)
+    if list(serialized_fav_planets).count() > 0:
+        return {"data": list(serialized_fav_planets), "status": 200}
+    else:
+        return {"data": None, "status": 400, "message": "No fav planets yet"}
+
+def add_fav_person(character_id):
+    character = Character.query.get(character_id)
+    db.session.add(character)
+    db.session.commit()
+    fav_characters = UserFavCharacters.query.all()
+    serialized_fav_characters = map(lambda fav_character: fav_character.serialize(), fav_characters)
+    if list(serialized_fav_characters).count() > 0:
+        return {"data": list(serialized_fav_characters), "status": 200}
+    else:
+        return {"data": None, "status": 400, "message": "No fav planets yet"}
+
+def delete_fav_planet(planet_id):
+    planet = Planet.query.get(planet_id)
+    db.session.delete(planet)
+    db.session.commit()
+    fav_planets = UserFavPlanets.query.all()
+    serialized_fav_planets = map(lambda fav_planet: fav_planet.serialize(), fav_planets)
+    if list(serialized_fav_planets).count() > 0:
+        return {"data": list(serialized_fav_planets), "status": 200}
+    else:
+        return {"data": None, "status": 400, "message": "No fav planets yet"}
+
+def delete_fav_person(character_id):
+    character = Character.query.get(character_id)
+    db.session.delete(character)
+    db.session.commit()
+    fav_characters = UserFavCharacters.query.all()
+    serialized_fav_characters = map(lambda fav_character: fav_character.serialize(), fav_characters)
+    if list(serialized_fav_characters).count() > 0:
+        return {"data": list(serialized_fav_characters), "status": 200}
+    else:
+        return {"data": None, "status": 400, "message": "No fav planets yet"}
