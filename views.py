@@ -21,7 +21,7 @@ def updateperson():
     request_body = request.get_json()
     return update_person(request_body)
 
-@app.route('/planets', methods=['DELETE'])
+@app.route('/people', methods=['DELETE'])
 def deleteperson():
     request_body = request.get_json()
     return delete_person(request_body)

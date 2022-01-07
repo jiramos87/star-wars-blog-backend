@@ -237,7 +237,7 @@ def add_fav_person(character_id):
     if list(serialized_fav_characters).count() > 0:
         return {"data": list(serialized_fav_characters), "status": 200}
     else:
-        return {"data": None, "status": 400, "message": "No fav planets yet"}
+        return {"data": None, "status": 400, "message": "No characters found"}
 
 def delete_fav_planet(planet_id):
     planet = Planet.query.get(planet_id)
@@ -259,4 +259,80 @@ def delete_fav_person(character_id):
     if list(serialized_fav_characters).count() > 0:
         return {"data": list(serialized_fav_characters), "status": 200}
     else:
+        return {"data": None, "status": 400, "message": "No characters found"}
+
+
+def add_person(request_body):
+    db.session.add(Character(name = request_body['name'], home_planet = request_body['home_planet']))
+    db.session.commit()
+    characters = Character.query.all()
+    serialized_characters = map(lambda character: characters.serialize(), characters)
+    if list(serialized_characters).count() > 0:
+        return {"data": list(serialized_characters), "status": 200}
+    else:
+        return {"data": None, "status": 400, "message": "No characters found"}
+
+def delete_person(request_body):
+    character_id = request_body['character_id']
+    character = Character.query.get(character_id)
+    db.session.delete(character)
+    db.session.commit()
+    characters = Character.query.all()
+    serialized_characters = map(lambda character: character.serialize(), characters)
+    if list(serialized_characters).count() > 0:
+        return {"data": list(serialized_characters), "status": 200}
+    else:
         return {"data": None, "status": 400, "message": "No fav planets yet"}
+
+def update_person(request_body):
+    character_id = request_body['character_id']
+    character = Character.query.get(character_id)
+    character.name = request_body['name']
+    character.home_planet = request_body['home_planet']
+
+    db.session.add(character)
+    db.session.commit()
+
+    characters = Character.query.all()
+    serialized_characters = map(lambda character: character.serialize(), characters)
+    if list(serialized_characters).count() > 0:
+        return {"data": list(serialized_characters), "status": 200}
+    else:
+        return {"data": None, "status": 400, "message": "No fav planets yet"}
+
+def add_planet(request_body):
+    db.session.add(Planet(name = request_body['name'], rotation = request_body['rotation'], translation = request_body['translation']))
+    db.session.commit()
+    planets = Planet.query.all()
+    serialized_planets = map(lambda planet: planet.serialize(), planets)
+    if list(serialized_planets).count() > 0:
+        return {"data": list(serialized_planets), "status": 200}
+    else:
+        return {"data": None, "status": 400, "message": "No planets found"}
+
+def delete_planet(request_body):
+    planet_id = request_body['planet_id']
+    planet = Planet.query.get(planet_id)
+    db.session.delete(planet)
+    db.session.commit()
+    planets = Planet.query.all()
+    serialized_planets = map(lambda planet: planet.serialize(), planets)
+    if list(serialized_planets).count() > 0:
+        return {"data": list(serialized_planets), "status": 200}
+    else:
+        return {"data": None, "status": 400, "message": "No planets found"}
+
+def update_planet(request_body):
+    planet_id = request_body['planet_id']
+    planet = Planet.query.get(planet_id)
+    planet.name = request_body['name']
+    planet.rotation = request_body['rotation']
+    planet.translation = request_body['translation']
+    db.session.commit()
+    
+    planets = Planet.query.all()
+    serialized_planets = map(lambda planet: planet.serialize(), planets)
+    if list(serialized_planets).count() > 0:
+        return {"data": list(serialized_planets), "status": 200}
+    else:
+        return {"data": None, "status": 400, "message": "No planets yet"}
