@@ -7,7 +7,6 @@ bcrypt = Bcrypt(app)
 
 from requests.api import head
 from app import db
-import meta_weights
 from flask_jwt_extended import create_access_token
 from base64 import b64encode
 import base64
@@ -25,18 +24,16 @@ class User(db.Model):
     email = db.Column(db.String(50), unique=True)
     password = db.Column(db.String(512))
 
-    def __init__(self, username, email, password, is_admin):
+    def __init__(self, username, email, password):
         self.username = username
         self.email = email
         self.password = password
-        self.is_admin = is_admin
     
     def serialize(self):
         return {
             "id": self.id,
             "username": self.username,
             "email": self.email,
-            "is_admin": self.is_admin,
             "password": self.password
         }
 
@@ -103,8 +100,8 @@ class UserFavCharacters(db.Model):
     name = db.Column(db.String(250), nullable=False)
     character_id = db.Column(db.Integer, db.ForeignKey('character.id'))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    character = db.relationship("Character", back_populates="userfavcharacters" )
-    user = db.relationship("User", back_populates="userfavcharacters")
+    character = db.relationship("Character", backref="userfavcharacters" )
+    user = db.relationship("User", backref="userfavcharacters")
 
     def __init__(self, name, character_id, user_id):
         self.name = name
@@ -163,6 +160,33 @@ class UserFavVehicles(db.Model):
             "vehicles_id": self.vehicles_id,
             "user_id": self.user_id
         }
+
+def register(request_body):
+    if request.method == 'POST':
+        db.session.add(User(username=request_body['username'], email=request_body['email'], password=bcrypt.generate_password_hash(request_body['password']).decode('utf-8')))
+        db.session.commit()
+        users = User.query.all()
+        serialized_users = map(lambda user: user.serialize(), users)
+        filtered_users = list(filter(lambda user: user['username'] == request_body['username'], serialized_users))
+        access_token = create_access_token(identity=filtered_users[0]['username'])
+        if(filtered_users.count != 0 or filtered_users != []):
+            return {"status": 200, "token": access_token}
+    
+
+def login(request_body):
+    print('backend login obj', request_body)
+    users = User.query.all()
+    serialized_users = map(lambda user: user.serialize(), users)
+    filtered_users = list(filter(lambda user: user['username'] == request_body['username'], serialized_users))
+    print('filtered users', filtered_users)
+    #print(filtered_users, bcrypt.generate_password_hash(request_body['password']))
+    if(filtered_users.count == 0 or filtered_users == []):
+        return {"status": 401, "message": "Incorrect username or password"}
+    elif(bcrypt.check_password_hash(filtered_users[0]['password'], request_body['password'])):
+        access_token = create_access_token(identity=filtered_users[0]['username'])
+        return {"user": list(filtered_users),"token": access_token, "status": 200}
+    else:
+        return abort(401)
 
 def get_all_people():
     characters = Character.query.all()
@@ -336,3 +360,9 @@ def update_planet(request_body):
         return {"data": list(serialized_planets), "status": 200}
     else:
         return {"data": None, "status": 400, "message": "No planets yet"}
+
+if __name__ == "__main__":
+    # Run this file directly to create the database tables.
+    print("Creating database tables...")
+    db.create_all()
+    print("Done!")

@@ -7,7 +7,7 @@ from flask_jwt_extended import JWTManager
 
 app = Flask(__name__, static_folder='static', static_url_path='')
 app.debug = True
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///futstarter.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///starwars.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['JSON_SORT_KEYS'] = False
 app.config["JWT_SECRET_KEY"] = "serverkey"
